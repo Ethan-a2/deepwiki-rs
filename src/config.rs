@@ -133,6 +133,14 @@ pub struct Config {
     /// Boundary analysis configuration
     #[serde(default)]
     pub boundary_analysis: BoundaryAnalysisConfig,
+
+    /// Skip research stage
+    #[serde(default)]
+    pub skip_research: bool,
+
+    /// Skip documentation generation stage
+    #[serde(default)]
+    pub skip_documentation: bool,
 }
 
 /// LLM model configuration
@@ -216,15 +224,15 @@ pub struct BoundaryAnalysisConfig {
 }
 
 fn default_max_boundary_insights() -> usize {
-    15  // Reduced default to avoid 504 timeouts on large codebases
+    15 // Reduced default to avoid 504 timeouts on large codebases
 }
 
 fn default_code_insights_limit() -> usize {
-    25  // Reduced default to balance performance and quality
+    25 // Reduced default to balance performance and quality
 }
 
 fn default_files_threshold() -> Option<usize> {
-    Some(100)  // Reduced threshold for better performance
+    Some(100) // Reduced threshold for better performance
 }
 
 /// Knowledge configuration for external documentation sources
@@ -682,6 +690,8 @@ impl Default for Config {
             cache: CacheConfig::default(),
             knowledge: KnowledgeConfig::default(),
             boundary_analysis: BoundaryAnalysisConfig::default(),
+            skip_research: false,
+            skip_documentation: false,
         }
     }
 }
@@ -733,7 +743,7 @@ mod tests {
     #[test]
     fn test_boundary_analysis_default_values() {
         let config = BoundaryAnalysisConfig::default();
-        
+
         assert_eq!(config.max_boundary_insights, 15);
         assert_eq!(config.code_insights_limit, 25);
         assert_eq!(config.include_source_code, false);

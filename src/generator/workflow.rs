@@ -87,34 +87,46 @@ pub async fn launch(c: &Config) -> Result<()> {
     );
 
     // Execute multi-agent research stage
-    let research_start = Instant::now();
-    let research_orchestrator = ResearchOrchestrator::default();
-    research_orchestrator
-        .execute_research_pipeline(&context)
-        .await?;
-    let research_time = research_start.elapsed().as_secs_f64();
-    context
-        .store_to_memory(TimingScope::TIMING, TimingKeys::RESEARCH, research_time)
-        .await?;
-    println!("\n=== Project in-depth research completed (Duration: {:.2}s) ===", research_time);
+    if !context.config.skip_research {
+        let research_start = Instant::now();
+        let research_orchestrator = ResearchOrchestrator::default();
+        research_orchestrator
+            .execute_research_pipeline(&context)
+            .await?;
+        let research_time = research_start.elapsed().as_secs_f64();
+        context
+            .store_to_memory(TimingScope::TIMING, TimingKeys::RESEARCH, research_time)
+            .await?;
+        println!("\n=== Project in-depth research completed (Duration: {:.2}s) ===", research_time);
+    } else {
+        println!("\n⏭️  Skipping research stage (--skip-research)");
+    }
 
     // Execute document generation process
-    let compose_start = Instant::now();
-    let mut doc_tree = DocTree::new(&context.config.target_language);
-    let documentation_orchestrator = DocumentationComposer::default();
-    documentation_orchestrator
-        .execute(&context, &mut doc_tree)
-        .await?;
-    let compose_time = compose_start.elapsed().as_secs_f64();
-    context
-        .store_to_memory(TimingScope::TIMING, TimingKeys::COMPOSE, compose_time)
-        .await?;
-    println!("\n=== Document generation completed (Duration: {:.2}s) ===", compose_time);
+    let doc_tree = if !context.config.skip_documentation {
+        let compose_start = Instant::now();
+        let mut doc_tree = DocTree::new(&context.config.target_language);
+        let documentation_orchestrator = DocumentationComposer::default();
+        documentation_orchestrator
+            .execute(&context, &mut doc_tree)
+            .await?;
+        let compose_time = compose_start.elapsed().as_secs_f64();
+        context
+            .store_to_memory(TimingScope::TIMING, TimingKeys::COMPOSE, compose_time)
+            .await?;
+        println!("\n=== Document generation completed (Duration: {:.2}s) ===", compose_time);
+        Some(doc_tree)
+    } else {
+        println!("\n⏭️  Skipping documentation stage (--skip-documentation)");
+        None
+    };
 
     // Execute document storage
     let output_start = Instant::now();
-    let outlet = DiskOutlet::new(doc_tree);
-    outlet.save(&context).await?;
+    if let Some(doc_tree) = doc_tree {
+        let outlet = DiskOutlet::new(doc_tree);
+        outlet.save(&context).await?;
+    }
 
     // Generate and save summary report
     let summary_outlet = SummaryOutlet::new();

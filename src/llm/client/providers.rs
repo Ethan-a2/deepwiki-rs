@@ -227,7 +227,7 @@ impl ProviderClient {
                     .agent(model)
                     .preamble(system_prompt)
                     .max_tokens(config.max_tokens.into())
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -250,7 +250,7 @@ impl ProviderClient {
                     .agent(model)
                     .preamble(system_prompt)
                     .max_tokens(config.max_tokens.into())
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -268,7 +268,7 @@ impl ProviderClient {
                     .agent(model)
                     .preamble(system_prompt)
                     .max_tokens(config.max_tokens.into())
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -285,7 +285,7 @@ impl ProviderClient {
                 let mut builder = client
                     .agent(model)
                     .preamble(system_prompt)
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -302,7 +302,7 @@ impl ProviderClient {
                 let mut builder = client
                     .agent(model)
                     .preamble(system_prompt)
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -320,7 +320,7 @@ impl ProviderClient {
                     .agent(model)
                     .preamble(system_prompt)
                     .max_tokens(config.max_tokens.into())
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -341,7 +341,7 @@ impl ProviderClient {
                     .agent(model)
                     .preamble(system_prompt)
                     .max_tokens(config.max_tokens.into())
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
@@ -360,7 +360,7 @@ impl ProviderClient {
                     .agent(model)
                     .preamble(system_prompt)
                     .max_tokens(config.max_tokens.into())
-                    .default_max_turns(5);
+                    .default_max_turns(100);
 
                 if let Some(temp) = config.temperature {
                     builder = builder.temperature(temp);
