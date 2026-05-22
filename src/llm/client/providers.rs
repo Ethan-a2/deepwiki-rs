@@ -407,6 +407,7 @@ impl ProviderClient {
                     config.api_base_url.clone(),
                     model.to_string(),
                     config.api_key.clone(),
+                    config.retry_delay_ms,
                 );
 
                 ProviderExtractor::OpenAI(wrapper)
@@ -483,6 +484,7 @@ impl ProviderClient {
                     config.retry_attempts,
                     config.api_base_url.clone(),
                     model.to_string(),
+                    config.retry_delay_ms,
                 );
 
                 ProviderExtractor::Ollama(wrapper)

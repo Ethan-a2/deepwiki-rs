@@ -22,6 +22,7 @@ pub struct OpenAICompatibleExtractorWrapper<T> {
     base_url: String,
     model: String,
     api_key: String,
+    retry_delay_ms: u64,
     _phantom: std::marker::PhantomData<T>,
 }
 
@@ -36,6 +37,7 @@ where
         base_url: String,
         model: String,
         api_key: String,
+        retry_delay_ms: u64,
     ) -> Self {
         Self {
             agent,
@@ -43,6 +45,7 @@ where
             base_url,
             model,
             api_key,
+            retry_delay_ms,
             _phantom: std::marker::PhantomData,
         }
     }
@@ -74,7 +77,13 @@ where
                         last_error = Some(error_msg);
                     }
                     if attempt < self.max_retries {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(3000)).await;
+                        let delay_ms =
+                            (self.retry_delay_ms * 2u64.pow(attempt as u32 - 1)).min(300_000);
+                        eprintln!(
+                            "   ⏳ Waiting {}s before next retry...",
+                            delay_ms / 1000
+                        );
+                        tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await;
                     }
                 }
             }

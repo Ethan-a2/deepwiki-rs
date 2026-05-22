@@ -43,7 +43,7 @@ impl LLMClient {
         AgentBuilder::new(&self.client, &self.config)
     }
 
-    /// Generic retry logic for handling async operation retry mechanism
+    /// Generic retry logic for handling async operation retry mechanism (exponential backoff)
     async fn retry_with_backoff<T, F, Fut>(&self, operation: F) -> Result<T>
     where
         F: Fn() -> Fut,
@@ -51,7 +51,8 @@ impl LLMClient {
     {
         let llm_config = &self.config.llm;
         let max_retries = llm_config.retry_attempts;
-        let retry_delay_ms = llm_config.retry_delay_ms;
+        let base_delay_ms = llm_config.retry_delay_ms;
+        let max_delay_ms = 300_000; // 300s cap
         let mut retries = 0;
 
         loop {
@@ -59,14 +60,20 @@ impl LLMClient {
                 Ok(result) => return Ok(result),
                 Err(err) => {
                     retries += 1;
-                    eprintln!(
-                        "❌ Model service call error, retrying (attempt {} / {}): {}",
-                        retries, max_retries, err
-                    );
                     if retries >= max_retries {
+                        eprintln!(
+                            "❌ Model service call error, no more retries (attempt {} / {}): {}",
+                            retries, max_retries, err
+                        );
                         return Err(err);
                     }
-                    tokio::time::sleep(std::time::Duration::from_millis(retry_delay_ms)).await;
+                    let delay_ms =
+                        (base_delay_ms * 2u64.pow(retries - 1)).min(max_delay_ms);
+                    eprintln!(
+                        "❌ Model service call error, retrying (attempt {} / {}): {}\n   ⏳ Waiting {}s before next retry...",
+                        retries, max_retries, err, delay_ms / 1000
+                    );
+                    tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
                 }
             }
         }
